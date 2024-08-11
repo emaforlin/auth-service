@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package auth.v1;
+
+service Auth {
+    rpc CheckPermissionScope(AuthorizationRequest) returns (AuthorizationResponse);
+}
+
+message AuthorizationRequest {
+    string token = 1;
+}
+
+message AuthorizationResponse {
+    repeated string allowedMethods = 1;
+}
