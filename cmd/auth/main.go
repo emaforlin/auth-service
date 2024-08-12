@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	logger := hclog.New(hclog.DefaultOptions)
+	logger := hclog.New(&hclog.LoggerOptions{
+		Level: hclog.Debug,
+	})
+
 	config.InitViper("config")
 	conf := config.LoadConfig()
 	server.NewRPCServer(logger, conf).Start()

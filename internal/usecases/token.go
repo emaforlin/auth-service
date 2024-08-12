@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"time"
+
 	"github.com/emaforlin/auth-service/internal/config"
 	"github.com/emaforlin/auth-service/pkg/entities"
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -8,10 +10,27 @@ import (
 
 type TokenUsecase interface {
 	Decode(token string) *entities.CustomClaims
+	NewToken(role string) (string, error)
 }
 
 type tokenUsecase struct {
 	cfg config.Config
+}
+
+// NewToken implements TokenUsecase.
+func (t *tokenUsecase) NewToken(role string) (string, error) {
+	claims := &entities.CustomClaims{
+		Role: role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(t.cfg.Jwt.Ttl)),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString(t.cfg.Jwt.Secret)
+	if err != nil {
+		return "", err
+	}
+	return ss, nil
 }
 
 // GetClaims implements TokenUsecase.

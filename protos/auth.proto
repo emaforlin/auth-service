@@ -3,7 +3,22 @@ syntax = "proto3";
 package auth.v1;
 
 service Auth {
+    rpc Login(LoginRequest) returns (LoginResponse);
     rpc CheckPermissionScope(AuthorizationRequest) returns (AuthorizationResponse);
+}
+
+message LoginRequest {
+    oneof identifiers {
+        string email = 1;
+        string username = 2;
+        string phone_number = 3;
+    };
+    string password = 4;
+    string role = 5;
+}
+
+message LoginResponse {
+    string token = 1;
 }
 
 message AuthorizationRequest {

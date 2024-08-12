@@ -3,6 +3,7 @@ package config
 import (
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
@@ -16,22 +17,24 @@ type Config struct {
 	Port          int
 	Jwt           Jwt
 	AccessControl map[string][]string
+	Dependencies  map[string]string
 }
-
 type Jwt struct {
 	Secret []byte
 	Ttl    time.Duration
 }
 
 func LoadConfig() *Config {
-	return &Config{
-		Port: 50015,
+	cfg := &Config{
+		Port: 50016,
 		Jwt: Jwt{
 			Ttl:    normalizeTime(viper.GetDuration("jwt.ttl")),
 			Secret: []byte(viper.GetString("jwt.secret")),
 		},
 		AccessControl: viper.GetStringMapStringSlice("permissions"),
+		Dependencies:  viper.GetStringMapString("dependencies.services"),
 	}
+	return cfg
 }
 
 func InitViper(filename string) {
@@ -43,6 +46,9 @@ func InitViper(filename string) {
 	if err := viper.ReadInConfig(); err != nil {
 		panic("error reading config file")
 	}
+
+	viper.OnConfigChange(func(e fsnotify.Event) {})
+	viper.WatchConfig()
 }
 
 func normalizeTime(ttlTime time.Duration) time.Duration {
