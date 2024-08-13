@@ -4,7 +4,7 @@ package auth.v1;
 
 service Auth {
     rpc Login(LoginRequest) returns (LoginResponse);
-    rpc CheckPermissionScope(AuthorizationRequest) returns (AuthorizationResponse);
+    rpc Authorize(AuthorizationRequest) returns (AuthorizationResponse);
 }
 
 message LoginRequest {
@@ -26,5 +26,5 @@ message AuthorizationRequest {
 }
 
 message AuthorizationResponse {
-    repeated string allowedMethods = 1;
+    bool allowed = 1;
 }

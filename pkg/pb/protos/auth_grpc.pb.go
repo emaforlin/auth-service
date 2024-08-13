@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Auth_Login_FullMethodName                = "/auth.v1.Auth/Login"
-	Auth_CheckPermissionScope_FullMethodName = "/auth.v1.Auth/CheckPermissionScope"
+	Auth_Login_FullMethodName     = "/auth.v1.Auth/Login"
+	Auth_Authorize_FullMethodName = "/auth.v1.Auth/Authorize"
 )
 
 // AuthClient is the client API for Auth service.
@@ -28,7 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	CheckPermissionScope(ctx context.Context, in *AuthorizationRequest, opts ...grpc.CallOption) (*AuthorizationResponse, error)
+	Authorize(ctx context.Context, in *AuthorizationRequest, opts ...grpc.CallOption) (*AuthorizationResponse, error)
 }
 
 type authClient struct {
@@ -49,10 +49,10 @@ func (c *authClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *authClient) CheckPermissionScope(ctx context.Context, in *AuthorizationRequest, opts ...grpc.CallOption) (*AuthorizationResponse, error) {
+func (c *authClient) Authorize(ctx context.Context, in *AuthorizationRequest, opts ...grpc.CallOption) (*AuthorizationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AuthorizationResponse)
-	err := c.cc.Invoke(ctx, Auth_CheckPermissionScope_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Auth_Authorize_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *authClient) CheckPermissionScope(ctx context.Context, in *Authorization
 // for forward compatibility.
 type AuthServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	CheckPermissionScope(context.Context, *AuthorizationRequest) (*AuthorizationResponse, error)
+	Authorize(context.Context, *AuthorizationRequest) (*AuthorizationResponse, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -78,8 +78,8 @@ type UnimplementedAuthServer struct{}
 func (UnimplementedAuthServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedAuthServer) CheckPermissionScope(context.Context, *AuthorizationRequest) (*AuthorizationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckPermissionScope not implemented")
+func (UnimplementedAuthServer) Authorize(context.Context, *AuthorizationRequest) (*AuthorizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Authorize not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 func (UnimplementedAuthServer) testEmbeddedByValue()              {}
@@ -120,20 +120,20 @@ func _Auth_Login_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Auth_CheckPermissionScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Auth_Authorize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AuthorizationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServer).CheckPermissionScope(ctx, in)
+		return srv.(AuthServer).Authorize(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Auth_CheckPermissionScope_FullMethodName,
+		FullMethod: Auth_Authorize_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).CheckPermissionScope(ctx, req.(*AuthorizationRequest))
+		return srv.(AuthServer).Authorize(ctx, req.(*AuthorizationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -150,8 +150,8 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Auth_Login_Handler,
 		},
 		{
-			MethodName: "CheckPermissionScope",
-			Handler:    _Auth_CheckPermissionScope_Handler,
+			MethodName: "Authorize",
+			Handler:    _Auth_Authorize_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

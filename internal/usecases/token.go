@@ -9,7 +9,7 @@ import (
 )
 
 type TokenUsecase interface {
-	Decode(token string) *entities.CustomClaims
+	GetClaims(token string) *entities.CustomClaims
 	NewToken(role string) (string, error)
 }
 
@@ -34,7 +34,7 @@ func (t *tokenUsecase) NewToken(role string) (string, error) {
 }
 
 // GetClaims implements TokenUsecase.
-func (t *tokenUsecase) Decode(token string) *entities.CustomClaims {
+func (t *tokenUsecase) GetClaims(token string) *entities.CustomClaims {
 	jwt, err := jwt.ParseWithClaims(token, &entities.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return t.cfg.Jwt.Secret, nil
 	})

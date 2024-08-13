@@ -6,6 +6,7 @@ import (
 	accountsPb "github.com/emaforlin/accounts-service/x/handlers/grpc/protos"
 	"github.com/emaforlin/auth-service/internal/config"
 	pb "github.com/emaforlin/auth-service/pkg/pb/protos"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -13,7 +14,7 @@ import (
 
 type AuthUsecase interface {
 	Login(*pb.LoginRequest) string
-	CheckPermissionScope(*pb.AuthorizationRequest) []string
+	IsAuthorized(*pb.AuthorizationRequest) bool
 }
 
 type authUsecase struct {
@@ -61,10 +62,21 @@ func (u *authUsecase) Login(in *pb.LoginRequest) string {
 }
 
 // CheckPermissionScope implements AuthUsecase.
-func (u *authUsecase) CheckPermissionScope(in *pb.AuthorizationRequest) []string {
-	claims := u.tokenManager.Decode(in.GetToken())
+func (u *authUsecase) IsAuthorized(in *pb.AuthorizationRequest) bool {
+	tokenStr := in.GetToken()
+
+	claims := u.tokenManager.GetClaims(tokenStr)
 	permissions := u.cfg.AccessControl[claims.Role]
-	return permissions
+
+	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+		return u.cfg.Jwt.Secret, nil
+	})
+	if err != nil {
+		return false
+	}
+	if !token.Valid {
+		return false
+	}
 }
 
 func NewAuthUsecase(c *config.Config) AuthUsecase {

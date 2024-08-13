@@ -26,7 +26,7 @@ func (h *authServerImpl) Login(ctx context.Context, in *pb.LoginRequest) (*pb.Lo
 	}, nil
 }
 
-func (h *authServerImpl) CheckPermissionScope(ctx context.Context, in *pb.AuthorizationRequest) (*pb.AuthorizationResponse, error) {
+func (h *authServerImpl) Authorize(ctx context.Context, in *pb.AuthorizationRequest) (*pb.AuthorizationResponse, error) {
 	h.log.Info("Handle CheckPermissionScope")
 	return &pb.AuthorizationResponse{AllowedMethods: h.usecase.CheckPermissionScope(in)}, nil
 }
